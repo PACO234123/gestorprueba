@@ -1,14 +1,34 @@
 clientes = []
 
 
+def validar_nombre(nombre):
+    return nombre.strip() != ""
+
+
+def validar_email(email):
+    return "@" in email and "." in email
+
+
+class Cliente:
+    def __init__(self, nombre, email, telefono=""):
+        self.nombre = nombre
+        self.email = email
+        self.telefono = telefono
+
+    def es_valido(self):
+        return validar_nombre(self.nombre) and validar_email(self.email)
+
+
 def menu_clientes():
     terminar = False
-    while terminar == False:
+
+    while not terminar:
         print("\n--- CLIENTES ---")
         print("1. Añadir cliente")
         print("2. Listar clientes")
         print("3. Buscar cliente")
         print("4. Volver")
+
         op = input("Opción: ")
 
         if op == "1":
@@ -28,33 +48,52 @@ def crear_cliente():
     telefono = input("Teléfono: ")
     email = input("Email: ")
 
-    # Validación pobre a propósito para que se pueda mejorar
-    if nombre == "":
+    if not validar_nombre(nombre):
         print("El nombre no puede estar vacío")
-    else:
-        cliente = {"nombre": nombre, "telefono": telefono, "email": email}
-        clientes.append(cliente)
-        print("Cliente añadido")
+        return
+
+    cliente = {
+        "nombre": nombre,
+        "telefono": telefono,
+        "email": email
+    }
+
+    clientes.append(cliente)
+    print("Cliente añadido")
 
 
 def listar_clientes():
     print("\nLISTADO DE CLIENTES")
+
     if len(clientes) == 0:
         print("No hay clientes")
-    else:
-        i = 0
-        while i < len(clientes):
-            c = clientes[i]
-            print(str(i + 1) + ". " + c["nombre"] + " - " + c["telefono"] + " - " + c["email"])
-            i = i + 1
+        return
+
+    for i, cliente in enumerate(clientes):
+        print(
+            f"{i + 1}. {cliente['nombre']} - "
+            f"{cliente['telefono']} - "
+            f"{cliente['email']}"
+        )
 
 
 def buscar_cliente():
     texto = input("Texto a buscar: ")
+
     encontrado = False
-    for c in clientes:
-        if texto.lower() in c["nombre"].lower() or texto in c["telefono"] or texto.lower() in c["email"].lower():
-            print(c["nombre"] + " - " + c["telefono"] + " - " + c["email"])
+
+    for cliente in clientes:
+        if (
+            texto.lower() in cliente["nombre"].lower()
+            or texto in cliente["telefono"]
+            or texto.lower() in cliente["email"].lower()
+        ):
+            print(
+                f"{cliente['nombre']} - "
+                f"{cliente['telefono']} - "
+                f"{cliente['email']}"
+            )
             encontrado = True
-    if encontrado == False:
+
+    if not encontrado:
         print("No se encontraron clientes")

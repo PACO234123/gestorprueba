@@ -47,11 +47,14 @@ def calcular_descuento(total):
     Returns:
         float: descuento a aplicar
     """
+    DESCUENTO_MEDIO = 0.10
+    DESCUENTO_ALTO = 0.15
+
     if total > 250:
-        return total * 0.15
+        return total * DESCUENTO_ALTO
 
     if total > 100:
-        return total * 0.10
+        return total * DESCUENTO_MEDIO
 
     return 0
 

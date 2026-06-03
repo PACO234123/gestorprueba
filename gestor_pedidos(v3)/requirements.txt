@@ -1,1 +1,0 @@
-# El alumnado instalará pytest y ruff durante la práctica.

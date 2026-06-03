@@ -4,14 +4,57 @@ from utilidades import pedir_numero
 pedidos = []
 
 
+class LineaPedido:
+    def __init__(self, producto, precio, cantidad):
+        self.producto = producto
+        self.precio = precio
+        self.cantidad = cantidad
+
+    def subtotal(self):
+        if self.cantidad <= 0:
+            raise ValueError("La cantidad debe ser mayor que cero")
+
+        return self.precio * self.cantidad
+
+
+def calcular_total_lineas(lineas):
+    return sum(linea.subtotal() for linea in lineas)
+
+
+def calcular_descuento(total):
+    if total > 250:
+        return total * 0.15
+
+    if total > 100:
+        return total * 0.10
+
+    return 0
+
+
+class Pedido:
+    def __init__(self, cliente):
+        self.cliente = cliente
+        self.lineas = []
+
+    def agregar_linea(self, linea):
+        self.lineas.append(linea)
+
+    def total_con_descuento(self):
+        subtotal = calcular_total_lineas(self.lineas)
+        descuento = calcular_descuento(subtotal)
+        return subtotal - descuento
+
+
 def menu_pedidos():
     fin = False
-    while fin == False:
+
+    while not fin:
         print("\n--- PEDIDOS ---")
         print("1. Crear pedido")
         print("2. Listar pedidos")
         print("3. Calcular total de un pedido")
         print("4. Volver")
+
         opcion = input("Opción: ")
 
         if opcion == "1":
@@ -28,22 +71,23 @@ def menu_pedidos():
 
 def nuevo_pedido():
     print("\nCREAR PEDIDO")
+
     if len(clientes) == 0:
         print("Primero debes crear un cliente")
         return
 
-    i = 0
-    while i < len(clientes):
-        print(str(i + 1) + ". " + clientes[i]["nombre"])
-        i = i + 1
+    for i, cliente in enumerate(clientes):
+        print(f"{i + 1}. {cliente['nombre']}")
 
     numero_cliente = pedir_numero("Elige cliente: ")
+
     if numero_cliente < 1 or numero_cliente > len(clientes):
         print("Cliente incorrecto")
         return
 
     lineas = []
     seguir = "s"
+
     while seguir == "s":
         producto = input("Producto: ")
         cantidad = pedir_numero("Cantidad: ")
@@ -56,32 +100,60 @@ def nuevo_pedido():
         elif precio <= 0:
             print("Precio incorrecto")
         else:
-            lineas.append({"producto": producto, "cantidad": cantidad, "precio": precio})
+            lineas.append({
+                "producto": producto,
+                "cantidad": cantidad,
+                "precio": precio
+            })
             print("Línea añadida")
 
         seguir = input("¿Añadir otro producto? s/n: ")
 
-    pedido = {"cliente": clientes[numero_cliente - 1], "lineas": lineas, "estado": "pendiente"}
+    pedido = {
+        "cliente": clientes[numero_cliente - 1],
+        "lineas": lineas,
+        "estado": "pendiente"
+    }
+
     pedidos.append(pedido)
     print("Pedido creado")
 
 
+def calcular_totales(pedido):
+    subtotal = 0
+
+    for linea in pedido["lineas"]:
+        subtotal += linea["cantidad"] * linea["precio"]
+
+    descuento = calcular_descuento(subtotal)
+
+    base_imponible = subtotal - descuento
+    iva = base_imponible * 0.21
+    total = base_imponible + iva
+
+    return {
+        "subtotal": subtotal,
+        "descuento": descuento,
+        "iva": iva,
+        "total": total
+    }
+
+
 def ver_pedidos():
     print("\nLISTADO DE PEDIDOS")
+
     if len(pedidos) == 0:
         print("No hay pedidos")
-    else:
-        pos = 0
-        for p in pedidos:
-            total = 0
-            for l in p["lineas"]:
-                total = total + l["cantidad"] * l["precio"]
-            if total > 100:
-                total = total - total * 0.10
-            elif total > 50:
-                total = total - total * 0.05
-            print(str(pos + 1) + ". Cliente: " + p["cliente"]["nombre"] + " | Estado: " + p["estado"] + " | Total: " + str(round(total, 2)) + " €")
-            pos = pos + 1
+        return
+
+    for i, pedido in enumerate(pedidos):
+        resultado = calcular_totales(pedido)
+
+        print(
+            f"{i + 1}. Cliente: {pedido['cliente']['nombre']} | "
+            f"Estado: {pedido['estado']} | "
+            f"Total: {round(resultado['total'], 2)} €"
+        )
 
 
 def calcular_total_desde_menu():
@@ -90,32 +162,14 @@ def calcular_total_desde_menu():
         return
 
     n = pedir_numero("Número de pedido: ")
+
     if n < 1 or n > len(pedidos):
         print("Pedido no válido")
         return
 
-    p = pedidos[n - 1]
-    suma = 0
-    for linea in p["lineas"]:
-        suma = suma + linea["cantidad"] * linea["precio"]
+    resultado = calcular_totales(pedidos[n - 1])
 
-    # Reglas de descuento duplicadas a propósito
-    descuento = 0
-    if suma > 100:
-        descuento = suma * 0.10
-    elif suma > 50:
-        descuento = suma * 0.05
-
-    iva = (suma - descuento) * 0.21
-    total = suma - descuento + iva
-
-    print("Subtotal: " + str(round(suma, 2)))
-    print("Descuento: " + str(round(descuento, 2)))
-    print("IVA: " + str(round(iva, 2)))
-    print("TOTAL: " + str(round(total, 2)))
-
-
-def cambiar_estado_pedido():
-    # Función sin usar, pensada para detectar código muerto o incompleto
-    x = input("Nuevo estado: ")
-    return x
+    print("Subtotal:", round(resultado["subtotal"], 2))
+    print("Descuento:", round(resultado["descuento"], 2))
+    print("IVA:", round(resultado["iva"], 2))
+    print("TOTAL:", round(resultado["total"], 2))

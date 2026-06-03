@@ -5,7 +5,16 @@ pedidos = []
 
 
 class LineaPedido:
+    """Clase que representa una línea de pedido con producto, precio y cantidad.
+    """
     def __init__(self, producto, precio, cantidad):
+        """setup de la clase LineaPedido
+
+        Args:
+            producto (): producto de la línea de pedido
+            precio (): precio unitario del producto
+            cantidad (): cantidad del producto en la línea de pedido
+        """
         self.producto = producto
         self.precio = precio
         self.cantidad = cantidad
@@ -18,10 +27,26 @@ class LineaPedido:
 
 
 def calcular_total_lineas(lineas):
+    """calculo el total de una lista de líneas de pedido
+
+    Args:
+        lineas (List[LineaPedido]): lista de objetos LineaPedido
+
+    Returns:
+        float: el total de las líneas de pedido
+    """
     return sum(linea.subtotal() for linea in lineas)
 
 
 def calcular_descuento(total):
+    """ calculo el descuento a aplicar según el total de las líneas de pedido
+
+    Args:
+        total (float): total de las líneas de pedido
+
+    Returns:
+        float: descuento a aplicar
+    """
     if total > 250:
         return total * 0.15
 
@@ -32,6 +57,7 @@ def calcular_descuento(total):
 
 
 class Pedido:
+    """Clase que representa un pedido con un cliente y una lista de líneas de pedido."""
     def __init__(self, cliente):
         self.cliente = cliente
         self.lineas = []
@@ -40,6 +66,11 @@ class Pedido:
         self.lineas.append(linea)
 
     def total_con_descuento(self):
+        """total del pedido con descuento aplicado
+
+        Returns:
+            float: el total del pedido con descuento aplicado
+        """
         subtotal = calcular_total_lineas(self.lineas)
         descuento = calcular_descuento(subtotal)
         return subtotal - descuento
